@@ -1,4 +1,4 @@
-package batch.customer.detail.configuration;
+
 
 import batch.customer.detail.models.Transaction;
 import batch.customer.detail.models.dto.CustomerTransactionDto;

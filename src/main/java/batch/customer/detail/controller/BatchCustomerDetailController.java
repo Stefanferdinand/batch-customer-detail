@@ -1,6 +1,6 @@
-package batch.customer.detail.Controller;
+package batch.customer.detail.controller;
 
-import batch.customer.detail.Configuration.JobConfiguration;
+import batch.customer.detail.configuration.JobConfiguration;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.launch.JobLauncher;

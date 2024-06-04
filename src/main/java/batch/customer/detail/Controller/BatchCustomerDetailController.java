@@ -27,7 +27,7 @@ public class BatchCustomerDetailController {
         // nunggu model
 //        jobLauncher.run(jobConfiguration.job());
 
-        return "Retry Failed Job"
+        return "Retry Failed Job";
     }
 
 }

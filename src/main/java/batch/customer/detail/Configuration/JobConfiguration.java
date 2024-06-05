@@ -1,4 +1,4 @@
-package batch.customer.detail.Configuration;
+package batch.customer.detail.configuration;
 
 public class JobConfiguration {
 }

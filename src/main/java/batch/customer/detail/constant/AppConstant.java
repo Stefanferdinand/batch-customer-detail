@@ -9,4 +9,8 @@ import org.springframework.stereotype.Component;
 public class AppConstant {
     @Value("${data.chunk}")
     private int chunk;
+    @Value("${customer.job.name}")
+    private String customerJobName;
+    @Value("${transaction.job.name}")
+    private String transactionJobName;
 }

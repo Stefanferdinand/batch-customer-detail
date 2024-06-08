@@ -28,7 +28,7 @@ public class RetryJobConfig {
         this.jobExplorer = jobExplorer;
     }
 
-    public boolean retryJob(){
+    public boolean retryAllJob(){
         // get all unique job names
         var jobNames = jobExplorer.getJobNames().stream().toList();
 
@@ -42,21 +42,33 @@ public class RetryJobConfig {
 
         // restart all last job executions that have status & exit_code FAILED
         for(int i = 0 ; i < jobInstances.size(); i++){
-            var lastJobExec = jobExplorer.getLastJobExecution(jobInstances.get(i));
-
-            if(lastJobExec != null
-                    && !lastJobExec.isRunning()
-                    && lastJobExec.getExitStatus().getExitCode().equals(ExitStatus.FAILED.getExitCode())
-                    && lastJobExec.getStatus().equals(BatchStatus.FAILED))
-            {
-                try {
-                    jobOperator.restart(lastJobExec.getJobId());
-                } catch (Exception e){
-                    System.out.println(e.getMessage());
-                }
-            }
+            retryJobLogic(jobInstances.get(i));
         }
 
         return true;
+    }
+
+    public boolean retryJob(long instanceId){
+        JobInstance jobInstance = jobExplorer.getJobInstance(instanceId);
+
+        if(jobInstance != null){
+            retryJobLogic(jobInstance);
+        }
+        return true;
+    }
+
+    public void retryJobLogic(JobInstance jobInstance){
+        var lastJobExec = jobExplorer.getLastJobExecution(jobInstance);
+
+        if(lastJobExec != null
+                && !lastJobExec.isRunning()
+                && lastJobExec.getExitStatus().getExitCode().equals(ExitStatus.FAILED.getExitCode())
+                && lastJobExec.getStatus().equals(BatchStatus.FAILED)){
+            try {
+                jobOperator.restart(lastJobExec.getJobId());
+            } catch (Exception e){
+                System.out.println(e.getMessage());
+            }
+        }
     }
 }

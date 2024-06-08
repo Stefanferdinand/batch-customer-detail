@@ -1,5 +1,6 @@
 package batch.customer.detail.configuration;
 
+import batch.customer.detail.constant.AppConstant;
 import batch.customer.detail.models.dto.CustomerDto;
 import batch.customer.detail.models.dto.CustomerTransactionDto;
 import org.springframework.batch.core.Job;
@@ -20,6 +21,10 @@ import org.springframework.transaction.PlatformTransactionManager;
 @Configuration
 @EnableBatchProcessing
 public class CustomerConfig {
+
+    @Autowired
+    private AppConstant appConstant;
+
     @Bean
     public Job dataCustomerJob(
             JobRepository jobRepository,
@@ -38,19 +43,10 @@ public class CustomerConfig {
             ItemWriter<CustomerDto> csvItemWriterCustomer
     ){
         return new StepBuilder("dataCustomerStep", jobRepository)
-                .<CustomerDto, CustomerDto>chunk(1000, transactionManager)
+                .<CustomerDto, CustomerDto>chunk(appConstant.getChunk(), transactionManager)
                 .reader(dataCustReader)
                 .writer(csvItemWriterCustomer)
-                .allowStartIfComplete(true)
                 .build();
     }
 
-    @Autowired
-    public JobRegistry jobRegistry;
-    @Bean
-    public JobRegistryBeanPostProcessor jobRegistryBeanPostProcessor(){
-        JobRegistryBeanPostProcessor postProcessor = new JobRegistryBeanPostProcessor();
-        postProcessor.setJobRegistry(jobRegistry);
-        return postProcessor;
-    }
 }

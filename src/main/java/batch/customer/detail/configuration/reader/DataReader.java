@@ -1,5 +1,6 @@
 package batch.customer.detail.configuration.reader;
 
+import batch.customer.detail.constant.AppConstant;
 import batch.customer.detail.mapper.CustDetailsMapper;
 import batch.customer.detail.models.dto.CustomerDto;
 import batch.customer.detail.models.repository.SqlRepository;
@@ -7,6 +8,7 @@ import batch.customer.detail.models.dto.CustomerTransactionDto;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.database.builder.JdbcCursorItemReaderBuilder;
 import org.springframework.batch.item.database.builder.JdbcPagingItemReaderBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.stereotype.Component;
@@ -19,10 +21,14 @@ import java.time.format.DateTimeFormatter;
 @Component
 public class DataReader {
     private final SqlRepository repository;
-    private final DataSource dataSource;
 
-    public DataReader(DataSource dataSource) {
-        this.dataSource = dataSource;
+    @Autowired
+    private DataSource dataSource;
+
+    @Autowired
+    private AppConstant appConstant;
+
+    public DataReader() {
         repository = new SqlRepository();
     }
 
@@ -46,7 +52,7 @@ public class DataReader {
                 .name("dataCustReader")
                 .queryProvider(repository.getSQLCustProvider(dataSource))
                 .rowMapper(new CustDetailsMapper())
-                .pageSize(100)
+                .pageSize(appConstant.getChunk())
                 .build();
     }
 

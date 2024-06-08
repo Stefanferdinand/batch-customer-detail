@@ -9,6 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
 @Component
 public class TaskSchedule {
 
@@ -22,7 +25,8 @@ public class TaskSchedule {
     @Scheduled(cron = "0 5 0 * * *") //setiap jam 00:05
     public void transSchedule(){
         JobParameters jobParameters = new JobParametersBuilder()
-                .addLong("time", System.currentTimeMillis())
+                .addString("odate", LocalDate.now().format(DateTimeFormatter.ofPattern("ddMMyyyy")))
+//                .addLong("testing", System.currentTimeMillis()) //biar bisa run berkali2
                 .toJobParameters();
         try{
 //            jobLauncher.run(shipJob, jobParameters);

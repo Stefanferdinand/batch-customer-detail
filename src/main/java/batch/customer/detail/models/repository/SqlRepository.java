@@ -24,7 +24,8 @@ public class SqlRepository {
                         " LEFT JOIN transaction t ON c.cust_id = t.cust_id"
         );
         factoryBean.setGroupClause("GROUP BY c.cust_id");
-        factoryBean.setSortKey("c.cust_id");
+        factoryBean.setSortKey("cust_id");
+        factoryBean.setDataSource(dataSource);
         return factoryBean.getObject();
     }
 }

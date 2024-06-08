@@ -30,7 +30,7 @@ public class CustomerConfig {
             JobRepository jobRepository,
             Step dataCustomerStep
     ){
-        return new JobBuilder("dataCustomerJob", jobRepository)
+        return new JobBuilder(appConstant.getCustomerJobName(), jobRepository)
                 .start(dataCustomerStep)
                 .build();
     }

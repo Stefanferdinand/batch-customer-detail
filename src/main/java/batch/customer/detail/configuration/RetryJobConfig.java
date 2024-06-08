@@ -40,7 +40,7 @@ public class RetryJobConfig {
             }
         }
 
-        // restart all last job executions that have status & exit_code FAILED
+        // restart all last job executions that have status & exit_code FAILED || STOPPED
         for(int i = 0 ; i < jobInstances.size(); i++){
             retryJobLogic(jobInstances.get(i));
         }
@@ -50,25 +50,39 @@ public class RetryJobConfig {
 
     public boolean retryJob(long instanceId){
         JobInstance jobInstance = jobExplorer.getJobInstance(instanceId);
-
+        System.out.println("Getting Job Instance: " + jobInstance.getInstanceId());
         if(jobInstance != null){
-            retryJobLogic(jobInstance);
+            return retryJobLogic(jobInstance);
         }
+
         return true;
     }
 
-    public void retryJobLogic(JobInstance jobInstance){
+    public boolean retryJobLogic(JobInstance jobInstance){
         var lastJobExec = jobExplorer.getLastJobExecution(jobInstance);
+        System.out.println("Retrying Last Job Execution: " + lastJobExec.getJobInstance().getInstanceId());
 
         if(lastJobExec != null
                 && !lastJobExec.isRunning()
-                && lastJobExec.getExitStatus().getExitCode().equals(ExitStatus.FAILED.getExitCode())
-                && lastJobExec.getStatus().equals(BatchStatus.FAILED)){
+                && (
+                lastJobExec.getExitStatus().getExitCode().equals(ExitStatus.FAILED.getExitCode())
+                || lastJobExec.getExitStatus().getExitCode().equals(ExitStatus.STOPPED.getExitCode())
+                )
+                &&(
+                lastJobExec.getStatus().equals(BatchStatus.FAILED)
+                || lastJobExec.getStatus().equals(BatchStatus.STOPPED)
+                )){
             try {
-                jobOperator.restart(lastJobExec.getJobId());
+                System.out.println("Retrying job with job name: " + lastJobExec.getJobInstance().getJobName());
+                jobOperator.restart(lastJobExec.getJobInstance().getInstanceId());
             } catch (Exception e){
                 System.out.println(e.getMessage());
+                 throw new RuntimeException(e.getMessage());
             }
+        }else{
+            return false;
         }
+
+        return true;
     }
 }

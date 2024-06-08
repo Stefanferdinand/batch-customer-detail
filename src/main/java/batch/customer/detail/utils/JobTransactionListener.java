@@ -1,5 +1,6 @@
 package batch.customer.detail.utils;
 
+import batch.customer.detail.constant.AppConstant;
 import org.springframework.batch.core.*;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.launch.JobLauncher;
@@ -11,10 +12,12 @@ public class JobTransactionListener implements JobExecutionListener {
 
     private final JobLauncher jobLauncher;
     private final JobRegistry jobRegistry;
+    private final AppConstant appConstant;
 
-    public JobTransactionListener(JobLauncher jobLauncher, JobRegistry jobRegistry){
+    public JobTransactionListener(JobLauncher jobLauncher, JobRegistry jobRegistry, AppConstant appConstant){
         this.jobLauncher = jobLauncher;
         this.jobRegistry = jobRegistry;
+        this.appConstant = appConstant;
     }
 
     @Override
@@ -27,7 +30,7 @@ public class JobTransactionListener implements JobExecutionListener {
                     .toJobParameters();
             try{
 //                jobLauncher.run(dataCustomerJob, jobParameters);
-                jobLauncher.run(jobRegistry.getJob("dataCustomerJob"), jobParameters);
+                jobLauncher.run(jobRegistry.getJob(appConstant.getCustomerJobName()), jobParameters);
             }catch (Exception e){
                 e.printStackTrace();
             }

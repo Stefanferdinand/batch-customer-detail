@@ -36,7 +36,7 @@ public class TransactionConfig {
     ){
         return new JobBuilder(appConstant.getTransactionJobName(), jobRepository)
                 .start(dataTransactionStep)
-                .listener(new JobTransactionListener(jobLauncher, jobRegistry))
+                .listener(new JobTransactionListener(jobLauncher, jobRegistry, appConstant))
                 .build();
     }
 

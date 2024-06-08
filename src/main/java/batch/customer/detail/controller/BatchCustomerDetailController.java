@@ -34,10 +34,10 @@ public class BatchCustomerDetailController {
         return "Retry Failed Jobs";
     }
 
-    @GetMapping("/retryFailedJob")
-    public String retryFailedJob(@RequestParam long instanceId){
-        jobLauncher.run()
-    }
+//    @GetMapping("/retryFailedJob")
+//    public String retryFailedJob(@RequestParam long instanceId){
+//        jobLauncher.run()
+//    }
 
 //    @GetMapping("/triggerCustomerJob")
 //    public String triggerManualJob(){

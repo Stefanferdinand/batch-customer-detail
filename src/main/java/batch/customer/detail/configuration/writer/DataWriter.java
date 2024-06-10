@@ -32,6 +32,8 @@ public class DataWriter {
                 .delimited().delimiter(",")
                 .names(header)
                 .headerCallback(headerCallback)
+                .shouldDeleteIfEmpty(true)
+                .shouldDeleteIfExists(true)
                 .build();
     }
 
@@ -48,6 +50,8 @@ public class DataWriter {
                 .delimited().delimiter(",")
                 .names(header)
                 .headerCallback(headerCallback)
+                .shouldDeleteIfEmpty(true)
+                .shouldDeleteIfExists(true)
                 .build();
     }
 }

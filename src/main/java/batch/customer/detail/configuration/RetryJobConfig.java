@@ -21,58 +21,68 @@ public class RetryJobConfig {
     private JobRepository jobRepository;
     private JobOperator jobOperator;
     private JobExplorer jobExplorer;
-    private DataSourceConfig dataSourceConfig;
 
-    public RetryJobConfig(JobRepository jobRepository, JobOperator jobOperator, JobExplorer jobExplorer, DataSourceConfig dataSourceConfig) {
+    public RetryJobConfig(JobRepository jobRepository, JobOperator jobOperator, JobExplorer jobExplorer) {
         this.jobRepository = jobRepository;
         this.jobOperator = jobOperator;
         this.jobExplorer = jobExplorer;
-        this.dataSourceConfig = dataSourceConfig;
     }
 
-    //TODO: KENA TRANSACTION EXCEPTION ALREADY EXIST, NEED TO DEBUG
-    @Bean
-    public Step retryFailedJobsStep(){
-        return new StepBuilder("retryFailedJobsStep", jobRepository).tasklet(new Tasklet() {
-            @Override
-            public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
+    public boolean retryAllJob(){
+        // get all unique job names
+        var jobNames = jobExplorer.getJobNames().stream().toList();
 
-                // get all unique job names
-                var jobNames = jobExplorer.getJobNames().stream().toList();
-
-                // get all job instances except for retry failed jobs
-                List<JobInstance> jobInstances = new ArrayList<>();
-                for(int i = 0 ; i < jobNames.size(); i++){
-                    if(!jobNames.get(i).equals("retryAllFailedJobs")){
-                        jobInstances.addAll(jobExplorer.findJobInstancesByJobName(jobNames.get(i), 0, 10000));
-                    }
-                }
-
-                // restart all last job executions that have status & exit_code FAILED
-                for(int i = 0 ; i < jobInstances.size(); i++){
-                    var lastJobExec = jobExplorer.getLastJobExecution(jobInstances.get(i));
-
-                    if(lastJobExec != null
-                        && !lastJobExec.isRunning()
-                        && lastJobExec.getExitStatus().getExitCode().equals(ExitStatus.FAILED.getExitCode())
-                        && lastJobExec.getStatus().equals(BatchStatus.FAILED))
-                    {
-                        try {
-                            jobOperator.restart(lastJobExec.getJobId());
-                        } catch (Exception e){
-                            System.out.println(e.getMessage());
-                        }
-                    }
-                }
-
-                return RepeatStatus.FINISHED;
+        // get all job instances except for retry failed jobs
+        List<JobInstance> jobInstances = new ArrayList<>();
+        for(int i = 0 ; i < jobNames.size(); i++){
+            if(!jobNames.get(i).equals("retryAllFailedJobs")){
+                jobInstances.addAll(jobExplorer.findJobInstancesByJobName(jobNames.get(i), 0, 10000));
             }
-        }, dataSourceConfig.transactionManager()).build();
+        }
+
+        // restart all last job executions that have status & exit_code FAILED || STOPPED
+        for(int i = 0 ; i < jobInstances.size(); i++){
+            retryJobLogic(jobInstances.get(i));
+        }
+
+        return true;
     }
 
-    public Job retryAllFailedJobs(){
-        return new JobBuilder("retryAllFailedJobs", jobRepository)
-                .start(retryFailedJobsStep())
-                .build();
+    public boolean retryJob(long instanceId){
+        JobInstance jobInstance = jobExplorer.getJobInstance(instanceId);
+        System.out.println("Getting Job Instance: " + jobInstance.getInstanceId());
+        if(jobInstance != null){
+            return retryJobLogic(jobInstance);
+        }
+
+        return true;
+    }
+
+    public boolean retryJobLogic(JobInstance jobInstance){
+        var lastJobExec = jobExplorer.getLastJobExecution(jobInstance);
+        System.out.println("Retrying Last Job Execution: " + lastJobExec.getJobInstance().getInstanceId());
+
+        if(lastJobExec != null
+                && !lastJobExec.isRunning()
+                && (
+                lastJobExec.getExitStatus().getExitCode().equals(ExitStatus.FAILED.getExitCode())
+                || lastJobExec.getExitStatus().getExitCode().equals(ExitStatus.STOPPED.getExitCode())
+                )
+                &&(
+                lastJobExec.getStatus().equals(BatchStatus.FAILED)
+                || lastJobExec.getStatus().equals(BatchStatus.STOPPED)
+                )){
+            try {
+                System.out.println("Retrying job with job name: " + lastJobExec.getJobInstance().getJobName());
+                jobOperator.restart(lastJobExec.getJobInstance().getInstanceId());
+            } catch (Exception e){
+                System.out.println(e.getMessage());
+                 throw new RuntimeException(e.getMessage());
+            }
+        }else{
+            return false;
+        }
+
+        return true;
     }
 }

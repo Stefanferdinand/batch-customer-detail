@@ -1,12 +1,13 @@
 package batch.customer.detail.mapper;
 
 import batch.customer.detail.models.dto.CustomerDto;
+import batch.customer.detail.models.dto.CustomerTotalDto;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class CustDetailsMapper implements RowMapper<CustomerDto> {
+public class CustDailyMapper implements RowMapper<CustomerDto> {
     @Override
     public CustomerDto mapRow(ResultSet rs, int rowNum) throws SQLException {
         CustomerDto customerDto = new CustomerDto();
@@ -15,7 +16,6 @@ public class CustDetailsMapper implements RowMapper<CustomerDto> {
         customerDto.setCustGender(rs.getString("cust_gender"));
         customerDto.setCustLocation(rs.getString("cust_location"));
         customerDto.setCustBalance(rs.getBigDecimal("cust_balance"));
-        customerDto.setExpenses(rs.getBigDecimal("expenses"));
         return customerDto;
     }
 }

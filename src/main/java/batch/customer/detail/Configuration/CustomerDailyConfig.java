@@ -1,7 +1,8 @@
 package batch.customer.detail.configuration;
 
 import batch.customer.detail.constant.AppConstant;
-import batch.customer.detail.models.dto.CustomerTotalDto;
+import batch.customer.detail.models.dto.CustomerDto;
+import batch.customer.detail.models.dto.CustomerTransactionDto;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
@@ -18,34 +19,34 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 @EnableBatchProcessing
-public class CustomerConfig {
+public class CustomerDailyConfig {
 
     @Autowired
     private AppConstant appConstant;
 
     @Bean
-    public Job dataCustomerJob(
+    public Job dataCustomerDailyJob(
             JobRepository jobRepository,
-            Step dataCustomerStep
+            Step dataCustomerDailyStep
     ){
-        return new JobBuilder(appConstant.getCustomerJobName(), jobRepository)
-                .start(dataCustomerStep)
+        return new JobBuilder(appConstant.getCustDailyJobName(), jobRepository)
+                .start(dataCustomerDailyStep)
                 .build();
     }
 
     @Bean
-    public Step dataCustomerStep(
+    public Step dataCustomerDailyStep(
             JobRepository jobRepository,
             PlatformTransactionManager transactionManager,
-            ItemReader<CustomerTotalDto> dataCustReader,
-            ItemWriter<CustomerTotalDto> csvItemWriterCustomer
+            ItemReader<CustomerDto> dataCustDailyReader_db,
+            ItemWriter<CustomerDto> csvItemWriterCustomerDaily
     ){
-        return new StepBuilder("dataCustomerStep", jobRepository)
-                .<CustomerTotalDto, CustomerTotalDto>chunk(appConstant.getChunk(), transactionManager)
-                .reader(dataCustReader)
-                .writer(csvItemWriterCustomer)
+        return new StepBuilder("dataCustomerDailyStep", jobRepository)
+                .<CustomerDto, CustomerDto>chunk(appConstant.getChunk(), transactionManager)
+                .reader(dataCustDailyReader_db)
+                .writer(csvItemWriterCustomerDaily)
                 .taskExecutor(new SimpleAsyncTaskExecutor())
+                .allowStartIfComplete(true)
                 .build();
     }
-
 }

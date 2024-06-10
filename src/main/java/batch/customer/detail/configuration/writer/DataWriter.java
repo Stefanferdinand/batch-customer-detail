@@ -1,7 +1,10 @@
 package batch.customer.detail.configuration.writer;
 
 import batch.customer.detail.models.dto.CustomerDto;
+import batch.customer.detail.models.dto.CustomerTotalDto;
 import batch.customer.detail.models.dto.CustomerTransactionDto;
+import org.springframework.batch.core.scope.context.StepContext;
+import org.springframework.batch.core.scope.context.StepSynchronizationManager;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.file.FlatFileHeaderCallback;
 import org.springframework.batch.item.file.builder.FlatFileItemWriterBuilder;
@@ -38,19 +41,37 @@ public class DataWriter {
     }
 
     @Bean
-    public ItemWriter<CustomerDto> csvItemWriterCustomer(){
+    public ItemWriter<CustomerTotalDto> csvItemWriterCustomer(){
         String[] header = new String[]{
                 "custId", "custDob", "custGender","custLocation", "custBalance", "expenses"
         };
         String pathOut = String.format("data/output/cust_details_%s.csv", LocalDate.now().format(DateTimeFormatter.ofPattern("ddMMyyyy")));
         FlatFileHeaderCallback headerCallback = writer -> writer.write(String.join(",", header));
-        return new FlatFileItemWriterBuilder<CustomerDto>()
+        return new FlatFileItemWriterBuilder<CustomerTotalDto>()
                 .name("customerDetailsWriter")
                 .resource(new FileSystemResource(pathOut))
                 .delimited().delimiter(",")
                 .names(header)
                 .headerCallback(headerCallback)
                 .shouldDeleteIfEmpty(true)
+                .shouldDeleteIfExists(true)
+                .build();
+    }
+
+    @Bean
+    public ItemWriter<CustomerDto> csvItemWriterCustomerDaily(){
+        String[] header = new String[]{
+                "custId", "custDob", "custGender","custLocation", "custBalance"
+        };
+        String pathOut = String.format("data/output/cust_daily_%s.csv", LocalDate.now().format(DateTimeFormatter.ofPattern("ddMMyyyy")));
+        FlatFileHeaderCallback headerCallback = writer -> writer.write(String.join(",", header));
+        return new FlatFileItemWriterBuilder<CustomerDto>()
+                .name("customerDetailsWriterDaily")
+                .resource(new FileSystemResource(pathOut))
+                .delimited().delimiter(",")
+                .names(header)
+                .headerCallback(headerCallback)
+//                .shouldDeleteIfEmpty(true)
                 .shouldDeleteIfExists(true)
                 .build();
     }

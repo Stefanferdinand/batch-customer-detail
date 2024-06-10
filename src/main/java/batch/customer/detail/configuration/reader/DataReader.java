@@ -1,22 +1,32 @@
 package batch.customer.detail.configuration.reader;
 
 import batch.customer.detail.constant.AppConstant;
-import batch.customer.detail.mapper.CustDetailsMapper;
+import batch.customer.detail.mapper.CustCsvMapper;
+import batch.customer.detail.mapper.CustDailyMapper;
+import batch.customer.detail.mapper.CustTotalMapper;
 import batch.customer.detail.models.dto.CustomerDto;
+import batch.customer.detail.models.dto.CustomerTotalDto;
 import batch.customer.detail.models.repository.SqlRepository;
 import batch.customer.detail.models.dto.CustomerTransactionDto;
+import org.springframework.batch.core.scope.context.StepContext;
+import org.springframework.batch.core.scope.context.StepSynchronizationManager;
+import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.database.builder.JdbcCursorItemReaderBuilder;
 import org.springframework.batch.item.database.builder.JdbcPagingItemReaderBuilder;
+import org.springframework.batch.item.file.FlatFileItemReader;
+import org.springframework.batch.item.file.mapping.DefaultLineMapper;
+import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
 import java.time.LocalDate;
-import java.time.Month;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @Component
 public class DataReader {
@@ -46,16 +56,48 @@ public class DataReader {
     }
 
     @Bean
-    public ItemReader<CustomerDto> dataCustReader() throws Exception {
+    public ItemReader<CustomerDto> dataCustDailyReader_db() throws Exception {
         return new JdbcPagingItemReaderBuilder<CustomerDto>()
                 .dataSource(dataSource)
-                .name("dataCustReader")
-                .queryProvider(repository.getSQLCustProvider(dataSource))
-                .rowMapper(new CustDetailsMapper())
+                .name("dataCustDailyReader")
+                .queryProvider(repository.getSQLCustDailyProvider(
+                        dataSource,
+                        LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yy"))
+                ))
+                .rowMapper(new CustDailyMapper())
                 .pageSize(appConstant.getChunk())
                 .build();
     }
 
+//    TODO: Kalau pakai ini, harus tambah satu step lagi. Gak efisien.
+//    @Bean
+//    public ItemReader<CustomerTransactionDto> dataCustDailyReader_csv() throws Exception {
+//        String[] tokens = new String[] {"custId", "amount", "total"};
+//        DefaultLineMapper<CustomerTransactionDto> lineMapper = new DefaultLineMapper<>();
+//        DelimitedLineTokenizer tokenizer = new DelimitedLineTokenizer();
+//        tokenizer.setNames(tokens);
+//        lineMapper.setLineTokenizer(tokenizer);
+//        lineMapper.setFieldSetMapper(new CustCsvMapper());
+//
+//        FlatFileItemReader<CustomerTransactionDto> reader = new FlatFileItemReader<>();
+//        String pathIn = String.format("data/output/summary_%s.csv", LocalDate.now().format(DateTimeFormatter.ofPattern("ddMMyyyy")));
+//        reader.setResource(new FileSystemResource(pathIn));
+//        reader.setLinesToSkip(1);
+//        reader.setLineMapper(lineMapper);
+//        reader.setSaveState(false);
+//        reader.open(new ExecutionContext());
+//
+//        return reader;
+//    }
 
-
+    @Bean
+    public ItemReader<CustomerTotalDto> dataCustReader() throws Exception {
+        return new JdbcPagingItemReaderBuilder<CustomerTotalDto>()
+                .dataSource(dataSource)
+                .name("dataCustReader")
+                .queryProvider(repository.getSQLCustProvider(dataSource))
+                .rowMapper(new CustTotalMapper())
+                .pageSize(appConstant.getChunk())
+                .build();
+    }
 }

@@ -33,16 +33,18 @@ public class DataReader {
     }
 
     @Bean
-    public ItemReader<CustomerTransactionDto> dataTxnReader(){
+    public ItemReader<CustomerTransactionDto> dataTxnReader() throws Exception {
         //pake testing
-//        String sql = repository.getSQL_TXN(LocalDate.of(2016, Month.AUGUST, 16).format(DateTimeFormatter.ofPattern("dd-MM-yy")));
-        String sql = repository.getSQL_TXN(LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yy")));
-        return new JdbcCursorItemReaderBuilder<CustomerTransactionDto>()
+//        String date = LocalDate.of(2016, Month.AUGUST, 16).format(DateTimeFormatter.ofPattern("dd-MM-yy"));
+        String date = LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yy"));
+        return new JdbcPagingItemReaderBuilder<CustomerTransactionDto>()
                 .dataSource(dataSource)
                 .name("dataTxnReader")
-                .sql(sql)
+                .queryProvider(repository.getTransactionSQL(dataSource, date))
                 .rowMapper(new BeanPropertyRowMapper<>(CustomerTransactionDto.class))
+                .pageSize(appConstant.getChunk())
                 .build();
+
     }
 
     @Bean

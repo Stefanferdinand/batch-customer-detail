@@ -1,5 +1,6 @@
 package batch.customer.detail.scheduler;
 
+import batch.customer.detail.constant.AppConstant;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
@@ -20,6 +21,8 @@ public class TaskSchedule {
 
     @Autowired
     private JobRegistry jobRegistry;
+    @Autowired
+    private AppConstant appConstant;
 
 //    @Scheduled(cron = "*/10 * * * * *") //setiap 10s pake test
     @Scheduled(cron = "0 5 0 * * *") //setiap jam 00:05
@@ -30,7 +33,7 @@ public class TaskSchedule {
                 .toJobParameters();
         try{
 //            jobLauncher.run(shipJob, jobParameters);
-            JobExecution jobExecution = jobLauncher.run(jobRegistry.getJob("dataTransactionJob"), jobParameters);
+            JobExecution jobExecution = jobLauncher.run(jobRegistry.getJob(appConstant.getTransactionJobName()), jobParameters);
             System.out.println(jobExecution.getExitStatus());
         }catch (Exception e){
             e.printStackTrace();

@@ -71,7 +71,7 @@ public class DataWriter {
                 .delimited().delimiter(",")
                 .names(header)
                 .headerCallback(headerCallback)
-//                .shouldDeleteIfEmpty(true)
+                .shouldDeleteIfEmpty(true)
                 .shouldDeleteIfExists(true)
                 .build();
     }

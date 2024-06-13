@@ -13,4 +13,8 @@ public class AppConstant {
     private String customerJobName;
     @Value("${transaction.job.name}")
     private String transactionJobName;
+    @Value("${path.output}")
+    private String pathOutput;
+    @Value("$custdaily.job.name")
+    private String custDailyJobName;
 }

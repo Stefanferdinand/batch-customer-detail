@@ -33,6 +33,7 @@ public class SqlRepository {
         bean.setSortKey("cust_id");
         bean.setDataSource(dataSource);
         return bean.getObject();
+    }
 
     public PagingQueryProvider getSQLCustDailyProvider(
             DataSource dataSource,

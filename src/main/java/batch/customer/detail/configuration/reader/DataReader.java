@@ -63,27 +63,6 @@ public class DataReader {
                 .build();
     }
 
-//    TODO: Kalau pakai ini, harus tambah satu step lagi. Gak efisien.
-//    @Bean
-//    public ItemReader<CustomerTransactionDto> dataCustDailyReader_csv() throws Exception {
-//        String[] tokens = new String[] {"custId", "amount", "total"};
-//        DefaultLineMapper<CustomerTransactionDto> lineMapper = new DefaultLineMapper<>();
-//        DelimitedLineTokenizer tokenizer = new DelimitedLineTokenizer();
-//        tokenizer.setNames(tokens);
-//        lineMapper.setLineTokenizer(tokenizer);
-//        lineMapper.setFieldSetMapper(new CustCsvMapper());
-//
-//        FlatFileItemReader<CustomerTransactionDto> reader = new FlatFileItemReader<>();
-//        String pathIn = String.format("data/output/summary_%s.csv", LocalDate.now().format(DateTimeFormatter.ofPattern("ddMMyyyy")));
-//        reader.setResource(new FileSystemResource(pathIn));
-//        reader.setLinesToSkip(1);
-//        reader.setLineMapper(lineMapper);
-//        reader.setSaveState(false);
-//        reader.open(new ExecutionContext());
-//
-//        return reader;
-//    }
-
     @Bean
     public ItemReader<CustomerTotalDto> dataCustReader() throws Exception {
         return new JdbcPagingItemReaderBuilder<CustomerTotalDto>()

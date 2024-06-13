@@ -1,5 +1,6 @@
 package batch.customer.detail.configuration.writer;
 
+import batch.customer.detail.constant.AppConstant;
 import batch.customer.detail.models.dto.CustomerDto;
 import batch.customer.detail.models.dto.CustomerTotalDto;
 import batch.customer.detail.models.dto.CustomerTransactionDto;
@@ -8,6 +9,7 @@ import org.springframework.batch.core.scope.context.StepSynchronizationManager;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.file.FlatFileHeaderCallback;
 import org.springframework.batch.item.file.builder.FlatFileItemWriterBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.stereotype.Component;
@@ -19,10 +21,12 @@ import java.time.format.DateTimeFormatter;
 
 @Component
 public class DataWriter {
+    @Autowired
+    private AppConstant appConstant;
     @Bean
     public ItemWriter<CustomerTransactionDto> csvItemWriter(){
         String[] header = new String[]{"custId", "amount", "total"};
-        String pathOut = String.format("data/output/summary_%s.csv", LocalDate.now().format(DateTimeFormatter.ofPattern("ddMMyyyy")));
+        String pathOut = appConstant.getPathOutput() + String.format("summary_%s.csv", LocalDate.now().format(DateTimeFormatter.ofPattern("ddMMyyyy")));
         FlatFileHeaderCallback headerCallback = new FlatFileHeaderCallback() {
             @Override
             public void writeHeader(Writer writer) throws IOException {

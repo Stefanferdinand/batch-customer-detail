@@ -8,11 +8,6 @@ import javax.sql.DataSource;
 
 public class SqlRepository {
 
-    private final String SQL_TXN = "SELECT sum(trans_amount) amount, count(cust_id) total, cust_id FROM transaction WHERE TO_CHAR(trans_date, 'dd-mm-yy') = '?' GROUP BY cust_id";
-    public String getSQL_TXN(String date){
-        return SQL_TXN.replace("?", date);
-    }
-
     public PagingQueryProvider getSQLCustProvider(DataSource dataSource) throws Exception {
         SqlPagingQueryProviderFactoryBean factoryBean = new SqlPagingQueryProviderFactoryBean();
         factoryBean.setSelectClause(
@@ -28,6 +23,16 @@ public class SqlRepository {
         factoryBean.setDataSource(dataSource);
         return factoryBean.getObject();
     }
+
+    public PagingQueryProvider getTransactionSQL(DataSource dataSource, String date) throws Exception {
+        SqlPagingQueryProviderFactoryBean bean = new SqlPagingQueryProviderFactoryBean();
+        bean.setSelectClause("SELECT sum(trans_amount) amount, count(cust_id) total, cust_id");
+        bean.setFromClause("transaction");
+        bean.setGroupClause("GROUP BY cust_id");
+        bean.setWhereClause(String.format("WHERE TO_CHAR(trans_date, 'dd-mm-yy') = '%s'", date));
+        bean.setSortKey("cust_id");
+        bean.setDataSource(dataSource);
+        return bean.getObject();
 
     public PagingQueryProvider getSQLCustDailyProvider(
             DataSource dataSource,

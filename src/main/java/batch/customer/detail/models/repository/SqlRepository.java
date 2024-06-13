@@ -1,6 +1,5 @@
 package batch.customer.detail.models.repository;
 
-import lombok.Getter;
 import org.springframework.batch.item.database.PagingQueryProvider;
 import org.springframework.batch.item.database.support.SqlPagingQueryProviderFactoryBean;
 
@@ -40,14 +39,10 @@ public class SqlRepository {
             String date) throws Exception {
         SqlPagingQueryProviderFactoryBean factoryBean = new SqlPagingQueryProviderFactoryBean();
         factoryBean.setSelectClause(
-                "SELECT t.cust_id, c.cust_dob, c.cust_gender," +
-                        " c.cust_location, c.cust_balance"
+                "SELECT c.*, expenses, total_item"
         );
-        factoryBean.setFromClause(
-                "FROM transaction t"
-                + " INNER JOIN customer_details c ON t.cust_id = c.cust_id"
-        );
-        factoryBean.setWhereClause("WHERE TO_CHAR(trans_date, 'dd-mm-yy') = '?'".replace("?", date));
+        String form = String.format("FROM customer_details c JOIN (SELECT SUM(trans_amount) expenses, cust_id, count(cust_id) total_item FROM transaction WHERE TO_CHAR(trans_date, 'dd-mm-yy') = '%s' GROUP BY cust_id) tran ON c.cust_id = tran.cust_id", date);
+        factoryBean.setFromClause(form);
         factoryBean.setSortKey("cust_id");
         factoryBean.setDataSource(dataSource);
         return factoryBean.getObject();

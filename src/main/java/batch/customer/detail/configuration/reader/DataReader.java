@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
 import java.time.LocalDate;
+import java.time.Month;
 import java.time.format.DateTimeFormatter;
 
 @Component
@@ -58,7 +59,7 @@ public class DataReader {
                 .name("dataCustDailyReader")
                 .queryProvider(repository.getSQLCustDailyProvider(
                         dataSource, timestamp))
-                .rowMapper(new CustDailyMapper())
+                .rowMapper(new BeanPropertyRowMapper<>(CustomerDto.class))
                 .pageSize(appConstant.getChunk())
                 .build();
     }

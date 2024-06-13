@@ -33,5 +33,22 @@ public class SqlRepository {
         bean.setSortKey("cust_id");
         bean.setDataSource(dataSource);
         return bean.getObject();
+
+    public PagingQueryProvider getSQLCustDailyProvider(
+            DataSource dataSource,
+            String date) throws Exception {
+        SqlPagingQueryProviderFactoryBean factoryBean = new SqlPagingQueryProviderFactoryBean();
+        factoryBean.setSelectClause(
+                "SELECT t.cust_id, c.cust_dob, c.cust_gender," +
+                        " c.cust_location, c.cust_balance"
+        );
+        factoryBean.setFromClause(
+                "FROM transaction t"
+                + " INNER JOIN customer_details c ON t.cust_id = c.cust_id"
+        );
+        factoryBean.setWhereClause("WHERE TO_CHAR(trans_date, 'dd-mm-yy') = '?'".replace("?", date));
+        factoryBean.setSortKey("cust_id");
+        factoryBean.setDataSource(dataSource);
+        return factoryBean.getObject();
     }
 }

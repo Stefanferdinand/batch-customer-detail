@@ -11,7 +11,7 @@ import java.util.Date;
 @Setter
 @Getter
 @ToString
-public class CustomerDto {
+public class CustomerTotalDto {
     @Column(name = "cust_id")
     private String custId;
     @Column(name = "cust_dob")
@@ -22,4 +22,6 @@ public class CustomerDto {
     private String custLocation;
     @Column(name = "cust_balance")
     private BigDecimal custBalance;
+    @Column(name = "expenses")
+    private BigDecimal expenses;
 }

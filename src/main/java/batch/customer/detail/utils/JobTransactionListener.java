@@ -30,7 +30,7 @@ public class JobTransactionListener implements JobExecutionListener {
                     .toJobParameters();
             try{
 //                jobLauncher.run(dataCustomerJob, jobParameters);
-                jobLauncher.run(jobRegistry.getJob(appConstant.getCustomerJobName()), jobParameters);
+                jobLauncher.run(jobRegistry.getJob(appConstant.getCustDailyJobName()), jobParameters);
             }catch (Exception e){
                 e.printStackTrace();
             }

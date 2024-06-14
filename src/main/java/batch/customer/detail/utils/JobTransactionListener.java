@@ -5,9 +5,6 @@ import org.springframework.batch.core.*;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.launch.JobLauncher;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-
 public class JobTransactionListener implements JobExecutionListener {
 
     private final JobLauncher jobLauncher;
@@ -22,15 +19,10 @@ public class JobTransactionListener implements JobExecutionListener {
 
     @Override
     public void afterJob(JobExecution jobExecution){
-        System.out.println(jobExecution.getExitStatus().getExitCode());
         if (jobExecution.getExitStatus().getExitCode().equalsIgnoreCase("COMPLETED")) {
-            JobParameters jobParameters = new JobParametersBuilder()
-                    .addString("odate", LocalDate.now().format(DateTimeFormatter.ofPattern("ddMMyyyy")))
-//                    .addLong("testing", System.currentTimeMillis()) //biar bisa run berkali2
-                    .toJobParameters();
             try{
 //                jobLauncher.run(dataCustomerJob, jobParameters);
-                jobLauncher.run(jobRegistry.getJob(appConstant.getCustDailyJobName()), jobParameters);
+                jobLauncher.run(jobRegistry.getJob(appConstant.getCustDailyJobName()), new DefaultJobParam().init);
             }catch (Exception e){
                 e.printStackTrace();
             }

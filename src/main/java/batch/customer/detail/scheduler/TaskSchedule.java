@@ -1,17 +1,14 @@
 package batch.customer.detail.scheduler;
 
 import batch.customer.detail.constant.AppConstant;
+import batch.customer.detail.utils.DefaultJobParam;
 import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 
 @Component
 public class TaskSchedule {
@@ -24,18 +21,22 @@ public class TaskSchedule {
     @Autowired
     private AppConstant appConstant;
 
-//    @Scheduled(cron = "*/10 * * * * *") //setiap 10s pake test
-    @Scheduled(cron = "0 5 0 * * *") //setiap jam 00:05
+//    @Scheduled(cron = "*/10 * * * * *") // run every 10 seconds
+    @Scheduled(cron = "0 5 0 * * *") // run every day at 00:05 am
     public void transSchedule(){
-        JobParameters jobParameters = new JobParametersBuilder()
-                .addString("odate", LocalDate.now().format(DateTimeFormatter.ofPattern("ddMMyyyy")))
-//                .addLong("testing", System.currentTimeMillis()) //biar bisa run berkali2
-                .toJobParameters();
         try{
-//            jobLauncher.run(shipJob, jobParameters);
-            JobExecution jobExecution = jobLauncher.run(jobRegistry.getJob(appConstant.getTransactionJobName()), jobParameters);
+            JobExecution jobExecution = jobLauncher.run(jobRegistry.getJob(appConstant.getTransactionJobName()), new DefaultJobParam().init);
             System.out.println(jobExecution.getExitStatus());
         }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    @Scheduled(cron = "0 5 0 L * ?") //last day of month at 00:05 am
+    public void customerTotalSchedule(){
+        try {
+            JobExecution jobExecution = jobLauncher.run(jobRegistry.getJob(appConstant.getCustomerJobName()), new DefaultJobParam().init);
+        } catch (Exception e){
             e.printStackTrace();
         }
     }

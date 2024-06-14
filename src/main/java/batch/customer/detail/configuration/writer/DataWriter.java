@@ -65,7 +65,7 @@ public class DataWriter {
     @Bean
     public ItemWriter<CustomerDto> csvItemWriterCustomerDaily(){
         String[] header = new String[]{
-                "custId", "custDob", "custGender","custLocation", "custBalance"
+                "custId", "custDob", "custGender","custLocation", "custBalance", "expenses", "totalItem"
         };
         String pathOut = String.format("data/output/cust_daily_%s.csv", LocalDate.now().format(DateTimeFormatter.ofPattern("ddMMyyyy")));
         FlatFileHeaderCallback headerCallback = writer -> writer.write(String.join(",", header));
